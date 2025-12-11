@@ -25,7 +25,7 @@ func generateRandomElements(size int) ([]int, error) {
 	data := make([]int, size)
 
 	for i := range size {
-		data[i] = rand.Intn(SIZE)
+		data[i] = rand.Intn(SIZE) + 1
 	}
 
 	return data, nil
@@ -57,9 +57,8 @@ func maxChunks(data []int) (int, error) {
 	}
 
 	var wg sync.WaitGroup
-	var mu sync.Mutex
 	chunkSize := len(data) / CHUNKS
-	results := make([]int, 0, CHUNKS)
+	results := make([]int, CHUNKS)
 
 	for i := 0; i < CHUNKS; i++ {
 		wg.Add(1)
@@ -79,31 +78,19 @@ func maxChunks(data []int) (int, error) {
 			if len(chunk) == 0 {
 				return
 			}
-			chunkMax := chunk[0]
-			for _, val := range chunk {
-				if val > chunkMax {
-					chunkMax = val
-				}
+			chunkMax, err := maximum(chunk)
+			if err != nil {
+				return
 			}
-
-			mu.Lock()
-			results = append(results, chunkMax)
-			mu.Unlock()
+			results[chunkIndex] = chunkMax
 		}(i)
 	}
 	wg.Wait()
 
-	if len(results) == 0 {
+	finalMax, err := maximum(results)
+	if err != nil || finalMax == 0 {
 		return 0, errors.New("не удалось обработать чанки")
 	}
-
-	finalMax := results[0]
-	for _, val := range results[1:] {
-		if val > finalMax {
-			finalMax = val
-		}
-	}
-
 	return finalMax, nil
 }
 
