@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 const (
@@ -10,23 +13,40 @@ const (
 )
 
 // generateRandomElements generates random elements.
-func generateRandomElements(size int) []int {
-	// ваш код здесь
+func generateRandomElements(size int) ([]int, error) {
+	if size <= 0 {
+		return nil, errors.New("размер массива должен быть положительным")
+	}
+	if size > SIZE {
+		return nil, errors.New("размер массива больше максимально допустимого")
+	}
+
+	src := rand.NewSource(time.Now().Unix())
+	data := make([]int, size)
+
+	for i := range size {
+		data[i] = int(src.Int63() % int64(SIZE))
+	}
+
+	return data, nil
 }
 
 // maximum returns the maximum number of elements.
-func maximum(data []int) int {
+func maximum(data []int) (int, error) {
 	// ваш код здесь
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
-func maxChunks(data []int) int {
+func maxChunks(data []int) (int, error) {
 	// ваш код здесь
 }
 
 func main() {
 	fmt.Printf("Генерируем %d целых чисел", SIZE)
-	// ваш код здесь
+	data, err := generateRandomElements(SIZE)
+	if err != nil {
+		fmt.Printf("Ошибка генерации: %v\n", err)
+	}
 
 	fmt.Println("Ищем максимальное значение в один поток")
 	// ваш код здесь
